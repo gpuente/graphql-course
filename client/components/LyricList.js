@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import { graphql } from 'react-apollo';
+
+import { likeLyric } from '../graphql/mutations';
 
 export class LyricList extends Component {
   constructor(props) {
@@ -6,9 +9,33 @@ export class LyricList extends Component {
     this.state = {};
   }
 
+  onLike(id, likes) {
+    this.props.mutate({
+      variables: { id },
+      optimisticResponse: {
+        __typename: 'Mutation',
+        likeLyric: {
+          id,
+          likes: likes + 1,
+        },
+      },
+    });
+  }
+
   renderLyrics() {
     const content = this.props.lyrics.map(lyric => (
-      <li key={lyric.id} className="collection-item">{ lyric.content }</li>
+      <li key={lyric.id} className="collection-item">
+        { lyric.content }
+        <div>
+          <i
+            className="material-icons"
+            onClick={() => this.onLike(lyric.id, lyric.likes)}
+          >
+            thumb_up
+          </i>
+          { lyric.likes }
+        </div>
+      </li>
     ));
 
     return (
@@ -27,4 +54,4 @@ export class LyricList extends Component {
   }
 }
 
-export default LyricList;
+export default graphql(likeLyric)(LyricList);
